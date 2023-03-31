@@ -18,7 +18,7 @@ Evaluating both models on the training distribution described in Section III-B, 
 ## Preparing a Raw Point Cloud for Composition of a Graph: Rotating Overhanging Points
 Referenced on Page 3, Section III-B of the paper
 
-Given an overhanging point \(\boldsymbol{p}\) on the raw cloth point cloud \(P\), defined by whether the point's position along the \(z\)-axis is below the top of the bed, \(\boldsymbol{p} \in P: p_z < 0.575\), we apply the following function to rotate the point to the 2D bed plane:
+Given an overhanging point \(\boldsymbol{p}\) on the raw cloth point cloud \(P\), defined by whether the point's position along the \(z\)-axis is below the top of the bed, $$\boldsymbol{p} \in P: p_z < 0.575$$, we apply the following function to rotate the point to the 2D bed plane:
 
 $$H(\boldsymbol{p}) = \begin{cases} p_x > 0 & T_R^{-1} R_{R} T_R \boldsymbol{p} \\ p_x < 0 & T_L^{-1} R_{L} T_L \boldsymbol{p} \end{cases}$$
 
