@@ -8,7 +8,7 @@ $^1$ Carnegie Mellon, $^2$ Google X: Everyday Robots
 Submitted for consideration in IEEE Robotics and Automation Letters (RA-L)
 
 ### Supplementary Material
-#### You can find additional content the accompanies the paper here: [Supplementary Material](./supplementary-material.html)
+**You can find additional content the accompanies the paper here: [Supplementary Material](./supplementary-material.html)**
 
 #### Project Video
 <div>
