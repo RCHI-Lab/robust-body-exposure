@@ -1,8 +1,8 @@
 # Robust Body Exposure (RoBE): A Graph-based Dynamics Modeling Approach to Manipulating Blankets over People
 
-**[Kavya Puthuveetil](https://kpputhuveetil.github.io/)$^1$, Sasha Wald$^1$, Atharva Pusalkar$^1$, Pratyusha Karnati$^2$, [Zackory Erickson](https://zackory.com/)$^1$**
+**[Kavya Puthuveetil](https://kpputhuveetil.github.io/)$$^1$$, Sasha Wald$$^1$$, Atharva Pusalkar$$^1$$, Pratyusha Karnati$$^2$$, [Zackory Erickson](https://zackory.com/)$$^1$$**
 
-$^1$ Carnegie Mellon, $^2$ Google X: Everyday Robots
+$$^1$$ Carnegie Mellon, $$^2$$ Google X: Everyday Robots
 
 ### [ArXiv Link]() [ADD LINK]
 Submitted for consideration in IEEE Robotics and Automation Letters (RA-L)
