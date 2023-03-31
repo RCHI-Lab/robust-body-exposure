@@ -5,11 +5,12 @@
 
 ### [ArXiv Link]() [ADD LINK]
 Submitted for consideration in IEEE Robotics and Automation Letters (RA-L)
-View additional material that accompanies the paper here: [Supplemental Material](./supplemental-material.html).
+
+View additional content that accompanies the paper here: [Supplemental Material](./supplemental-material.html).
 
 <div>
   <div style="position:relative;padding-top:56.25%;">
-    <iframe src="https://youtu.be/embed/Sv9BRw6fsR0" frameborder="0" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
+    <iframe src="https://www.youtube.com/embed/Sv9BRw6fsR0" frameborder="0" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
       style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
   </div>
 </div>
