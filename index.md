@@ -6,7 +6,7 @@
 ### [ArXiv Link]() [ADD LINK]
 Submitted for consideration in IEEE Robotics and Automation Letters (RA-L)
 
-View additional content that accompanies the paper here: [Supplemental Material](./supplemental-material.html).
+## [Supplementary Material](./supplementary-material.html).
 
 <div>
   <div style="position:relative;padding-top:56.25%;">
