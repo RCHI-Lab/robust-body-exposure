@@ -6,8 +6,10 @@
 ### [ArXiv Link]() [ADD LINK]
 Submitted for consideration in IEEE Robotics and Automation Letters (RA-L)
 
-### [Supplementary Material](./supplementary-material.html)
+### Supplementary Material
+#### You can find additional content the accompanies the paper here: [Supplementary Material](./supplementary-material.html)
 
+#### Project Video
 <div>
   <div style="position:relative;padding-top:56.25%;">
     <iframe src="https://www.youtube.com/embed/Sv9BRw6fsR0" frameborder="0" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
