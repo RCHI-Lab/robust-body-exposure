@@ -19,7 +19,6 @@ Robotic caregivers could potentially improve the quality of life of many who req
 
 
 ## Citation
-
 ##### ["Robust Body Exposure (RoBE): A Graph-based Dynamics Modeling Approach to Manipulating Blankets over People"]() **ADD LINk**
 
 K. Puthuveetil, Sasha Wald, Atharva Pusalkar, Pratyusha Karnati, and Z. Erickson, “Robust Body Exposure (RoBE): A Graph-based Dynamics Modeling Approach to Manipulating Blankets over People,” 2023.
@@ -37,13 +36,13 @@ K. Puthuveetil, Sasha Wald, Atharva Pusalkar, Pratyusha Karnati, and Z. Erickson
 ```
 
 
-# Paper Summary and Supplementary Material
+# Paper Summary
 <!-- **You can find additional content the accompanies the paper here: [Supplementary Material](./supplementary-material.html)** -->
-The core findings of the work are detailed in the paper and can be understood independent of the content on this page. The following material is intended to expand on the methodology and results presented in the paper. 
+The core findings of the work are detailed in the paper and can be understood independent of the content on this page. The following material is intended to summarize and expand on the methodology and results presented in the paper. 
 
 
 
-<img src="assets/images/pipeline.png" alt="pipline">
+<img src="assets/images/pipeline.png" alt="pipeline">
 
 ## 2D vs. 3D Representations of the Cloth
 Referenced on Page 2, Section III-A of the paper
@@ -53,8 +52,12 @@ In Sections III-A and III-B, we describe how input graphs to our dynamics models
 Evaluating both models on the training distribution described in Section III-B, we find that the 2D and 3D dynamics models achieve $$F_1 = 0.77\pm0.23$$ and $$F_1 = 0.80\pm0.19$$, respectively. On the combination distribution, both models have identical performance, both achieving 0.65$$\pm$$0.30. Ultimately, we see that encoding a 3D representation of the cloth provides no significant improvement in performance despite requiring tedious depth alignment procedures to transfer simulation-trained models to the real world.
 
 
-## Preparing a Raw Point Cloud for Composition of a Graph: Rotating Overhanging Points
-Referenced on Page 3, Section III-B of the paper
+## Preparing a Raw Point Cloud for Composition of a Graph
+<!-- Referenced on Page 3, Section III-B of the paper -->
+
+<img src="assets/images/graph_prep.png" alt="graph_prep">
+
+We compose a graph $G = (V, E)$, where the nodes $V$ correspond to points in a processed cloth point cloud $P'$. To compute $P'$ from  a given raw cloth point cloud $P$, we first rotate blanket points that hang over the side of the bed up to the bed plane. Rotating overhanging points allows us to more accurately retain the full geometry of the blanket in the graph, which only encodes the 2D position of any particular cloth point.
 
 Given an overhanging point $$\boldsymbol{p}$$ on the raw cloth point cloud $$P$$, defined by whether the point's position along the $$z$$-axis is below the top of the bed, $$\boldsymbol{p} \in P: p_z < 0.575$$, we apply the following function to rotate the point to the 2D bed plane:
 
@@ -62,26 +65,44 @@ $$H(\boldsymbol{p}) = \begin{cases} p_x > 0 & T_R^{-1} R_{R} T_R \boldsymbol{p} 
 
 where $$T_R$$ and $$T_L$$ are translation matrices representing the translation between the axes along the right ([0.44, 0, 0.58]) and left ([-0.44, 0, 0.58]) edges of the bed relative to the origin of the world (center of the bed), and where $$R_R$$ and $$R_L$$ are 90 and -90 degree rotation matrices around an axis along the length of the bed that passes through its center ($$y$$-axis).
 
+After rotating the overhanging cloth points, we downsample the point cloud using a 5~cm centroid voxel grid filter [[1]](https://towardsdatascience.com/how-to-automate-lidar-point-cloud-processing-with-python-a027454a536c),[[2]](https://autowarefoundation.gitlab.io/autoware.auto/AutowareAuto/voxel-grid-filter-design.html). Lastly, we project all of the cloth points to the 2D bed plane, yielding the processed point cloud $P'$.
 
-## Performance using Dynamics Models Trained on Datasets of Various Size
-Referenced on Page 3, Section III-B, of the paper
+## Dynamics Model Training
 
-We train six dynamics models on datasets containing 100, 500, 1000, 5000, 7500, and 10,000 input graphs, respectively. The F-scores achieved by each model when used for control are shown in Figure \ref{fig:training_samps_v_fscore}. Performance plateaus once the number of training samples is greater than 5000. All further evaluations are conducted using the dynamics model trained on 10,000 input graphs.
+<!-- ## Performance using Dynamics Models Trained on Datasets of Various Size -->
+<!-- Referenced on Page 3, Section III-B, of the paper -->
+
+We train a dynamics model $F(G, \bm{a}) = \Delta \hat{V}$, based on the Graph Network-based Simulators (GNS) architecture [[3]](https://arxiv.org/abs/2002.09405), [[4]](https://arxiv.org/abs/2105.10389), that given an input graph $G$ that represents a cloth's initial state and a proposed action $\bm{a}$, predicts the displacement of the cloth $\Delta\hat{V}$ after execution of a cloth manipulation trajectory. We train our models over 250 epochs using the Adam optimizer with a mean squared error loss function, batch size of 100, and learning rate of 1e-4.
+
+
+
+
+
+
+<img src="assets/images/pipeline.png" alt="pipeline">
+
+We train six dynamics models on datasets containing 100, 500, 1000, 5000, 7500, and 10,000 input graphs, respectively. The F-scores achieved by each model when used for control are shown in the above figure. Performance saturates once the number of training samples is greater than 5000. All evaluations are conducted using the dynamics model trained on 10,000 input graphs.
 
 ## Optimization Hyperparameters
-Referenced on Page 4, Section III-D, of the paper
+<!-- Referenced on Page 4, Section III-D, of the paper -->
 
 
-## Formalization of the Geometric Baseline
-Referenced on Page 6, Section IV-B, of the paper
 
 ## Evaluations
+
+### Baselines
+#### Geometric Baseline
+<!-- Referenced on Page 6, Section IV-B, of the paper -->
+
+#### Reinforcement Baseline
+
+### Simulation
 
 ### Manikin Study
 
 <img src="assets/images/manikin_study.png" alt="pipline">
 
-### Manikin Study
+### Human Study
 
 #### Predefined Pose and Target Limb
 <img src="assets/images/human_study_predefined.png" alt="human_study_predefined">
