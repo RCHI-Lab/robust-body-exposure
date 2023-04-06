@@ -43,6 +43,7 @@ The core findings of the work are detailed in the paper and can be understood in
 
 
 
+<img src="assets/images/pipeline.png" alt="pipline">
 
 ## 2D vs. 3D Representations of the Cloth
 Referenced on Page 2, Section III-A of the paper
@@ -73,5 +74,19 @@ Referenced on Page 4, Section III-D, of the paper
 
 ## Formalization of the Geometric Baseline
 Referenced on Page 6, Section IV-B, of the paper
+
+## Evaluations
+
+### Manikin Study
+
+<img src="assets/images/pipeline.png" alt="pipline">
+
+### Manikin Study
+
+#### Predefined Pose and Target Limb
+<img src="assets/images/human_study_predefined.png" alt="human_study_predefined">
+
+#### Randomized Pose and Target Limb
+<img src="assets/images/human_study_random" alt="human_study_randomized">
 
 
