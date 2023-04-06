@@ -79,7 +79,7 @@ Referenced on Page 6, Section IV-B, of the paper
 
 ### Manikin Study
 
-<img src="assets/images/pipeline.png" alt="pipline">
+<img src="assets/images/manikin_study.png" alt="pipline">
 
 ### Manikin Study
 
@@ -87,6 +87,6 @@ Referenced on Page 6, Section IV-B, of the paper
 <img src="assets/images/human_study_predefined.png" alt="human_study_predefined">
 
 #### Randomized Pose and Target Limb
-<img src="assets/images/human_study_random" alt="human_study_randomized">
+<img src="assets/images/human_study_random.png" alt="human_study_randomized">
 
 
