@@ -44,13 +44,6 @@ The core findings of the work are detailed in the paper and can be understood in
 
 <img src="assets/images/pipeline.png" alt="pipeline">
 
-## 2D vs. 3D Representations of the Cloth
-Referenced on Page 2, Section III-A of the paper
-
-In Sections III-A and III-B, we describe how input graphs to our dynamics models encode the 2D position of the cloth at each node instead of the 3D position, allowing our models to be invariant to changes in depth. To verify that this representation of the cloth does not negatively impact performance relative to a 3D representation, we train a GNN that takes in input graphs that encode the 3D position of a given cloth point at each node. When preparing a given cloth point cloud for composition of a graph, we do not rotate the overhanging points and instead only voxelize the point cloud. The dynamics model is trained identically to that trained on a 2D representation of a cloth. 
-
-Evaluating both models on the training distribution described in Section III-B, we find that the 2D and 3D dynamics models achieve $$F_1 = 0.77\pm0.23$$ and $$F_1 = 0.80\pm0.19$$, respectively. On the combination distribution, both models have identical performance, both achieving 0.65$$\pm$$0.30. Ultimately, we see that encoding a 3D representation of the cloth provides no significant improvement in performance despite requiring tedious depth alignment procedures to transfer simulation-trained models to the real world.
-
 
 ## Preparing a Raw Point Cloud for Composition of a Graph
 <!-- Referenced on Page 3, Section III-B of the paper -->
@@ -90,24 +83,54 @@ We train six dynamics models on datasets containing 100, 500, 1000, 5000, 7500, 
 
 ## Evaluations
 
-### Baselines
+### Baselines Evaluated
 #### Geometric Baseline
 <!-- Referenced on Page 6, Section IV-B, of the paper -->
+This approach is founded on two assumptions that: 1) there exists a geometric relationship between the cloth and human pose that can be leveraged to uncover a blanket from part of the body and, 2) the cloth behaves like paper---pick and place actions can produce straight-line or accordion folds. To compute actions that "fold" the cloth over the body to uncover a target limb, we apply three strategies depending on the target to be uncovered
 
-#### Reinforcement Baseline
+##### Arms:
+Grasps the edge of the cloth, pulls towards the midline of the body on a path normal to the length of the arm  
+
+##### Lower Body Targets:
+Grasps along the midpoint of the target, pulls towards the head on a path parallel to the limb
+
+##### Upper Body and Entire Body:
+Grasps between the shoulders, pulls toward the feet on a path that bisects the body. We provide formal definitions of how each strategy computes these pick and place trajectories on the project webpage.
+
+#### Reinforcement Learning
+
+For this baseline, we use proximal policy optimization (PPO), a model-free deep RL method, to train policies to uncover a single target limb as demonstrated in prior work [[5]](https://arxiv.org/abs/2109.04930). We train a single policy for each of the ten target limbs. To run PPO in the real world, we had to go through the expensive process of training a second set of policies for each target limb, this time using a different action space matching the robot's workspace in the real world.
+
 
 ### Simulation
 
+####
+
+#### 2D vs. 3D Representations of the Cloth
+<!-- Referenced on Page 2, Section III-A of the paper -->
+
+In Sections III-A and III-B, we describe how input graphs to our dynamics models encode the 2D position of the cloth at each node instead of the 3D position, allowing our models to be invariant to changes in depth. To verify that this representation of the cloth does not negatively impact performance relative to a 3D representation, we train a GNN that takes in input graphs that encode the 3D position of a given cloth point at each node. When preparing a given cloth point cloud for composition of a graph, we do not rotate the overhanging points and instead only voxelize the point cloud. The dynamics model is trained identically to that trained on a 2D representation of a cloth. 
+
+Evaluating both models on the training distribution described in Section III-B, we find that the 2D and 3D dynamics models achieve $$F_1 = 0.77\pm0.23$$ and $$F_1 = 0.80\pm0.19$$, respectively. On the combination distribution, both models have identical performance, both achieving $$F_1 = 0.65\pm0.30$$. Ultimately, we see that encoding a 3D representation of the cloth provides no significant improvement in performance despite requiring tedious depth alignment procedures to transfer simulation-trained models to the real world.
+
 ### Manikin Study
+We compare our approach to baselines in the real world by deploying the robot to uncover target limbs of a medical manikin lying in the hospital bed. In the study, we evaluate all three methods for uncovering each of the seven target limbs on a set of three poses shown in the figure below (3 methods $\times$ 3 poses $\times$ 7 targets = 63 total trials). As we observed in simulation, RoBE outperforms the geometric approach and PPO on average. 
 
 <img src="assets/images/manikin_study.png" alt="pipline">
 
 ### Human Study
 
-#### Predefined Pose and Target Limb
+To evaluate the performance of our method in the real world, we run a human study (Carnegie Mellon University IRB Approval under 2022.00000351) with 12 participants (six female) with informed consent. For each participant, we demonstrate ten bedding manipulation trials (120 trials in total across participants). The ten trials are executed in two phases. 
+
+
+#### Phase 1: Predefined Pose and Target Limb
+The first phase consists of three trials where the participant is asked to assume a predefined pose, shown in the leftmost column of the figure below, and the robot attempts to uncover a predefined target body segment. By holding the pose and target constant, we examine the performance of our method given variation in body shape and size alone.
+
 <img src="assets/images/human_study_predefined.png" alt="human_study_predefined">
 
-#### Randomized Pose and Target Limb
+#### Phase 2: Randomized Pose and Target Limb
+The remaining seven trials are a part of Phase 2, in which we ask participants to assume any supine pose of their choosing and we randomly select a target body part to uncover. This second phase allows us to evaluate the robustness of our approach to a large set of challenging, unscripted resting poses. In these evaluations, we observed high performance consistent with simulation for most body targets.
+
 <img src="assets/images/human_study_random.png" alt="human_study_randomized">
 
 
