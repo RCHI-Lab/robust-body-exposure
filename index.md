@@ -45,12 +45,15 @@ The core findings of the work are detailed in the paper and can be understood in
 <img src="assets/images/pipeline.png" alt="pipeline">
 
 
+The above figure shows an overview of our approach: A) Starting with a human laying in a hospital bed, we take an observation of their pose, from which we generate a set of body points $$\chi$$. B) After covering the human with a blanket, we capture a point cloud of the initial cloth and process it for composition of a graph $$G(V, E)$$. C) We optimize over the dynamics model using CMA-ES, predicting the displacement of the cloth $$\Delta \hat{V}$$ given the input graph $$G$$ and a proposed action $$\hat{\bm{a}}$$ at every iteration. The objective function maximized during optimization is a measure of how well the final cloth state $$V_f = V + \Delta \hat{V}$$ produced by an action $$\hat{\bm{a}}$$ uncovered a given target limb. D) Once termination criteria are met, we select the best action $$a$$ from the set of proposed action $$\hat{a}$$ and generate an initial prediction of performance before executing the action in the real world.
+
+
 ## Preparing a Raw Point Cloud for Composition of a Graph
 <!-- Referenced on Page 3, Section III-B of the paper -->
 
 <img src="assets/images/graph_prep.png" alt="graph_prep">
 
-We compose a graph $$G = (V, E)$$, where the nodes $V$ correspond to points in a processed cloth point cloud $$P'$$. To compute $$P'$$ from  a given raw cloth point cloud $$P$$, we first rotate blanket points that hang over the side of the bed up to the bed plane. Rotating overhanging points allows us to more accurately retain the full geometry of the blanket in the graph, which only encodes the 2D position of any particular cloth point.
+We compose a graph $$G = (V, E)$$, where the nodes $$V$$ correspond to points in a processed cloth point cloud $$P'$$. To compute $$P'$$ from  a given raw cloth point cloud $$P$$, we first rotate blanket points that hang over the side of the bed up to the bed plane. Rotating overhanging points allows us to more accurately retain the full geometry of the blanket in the graph, which only encodes the 2D position of any particular cloth point.
 
 Given an overhanging point $$\boldsymbol{p}$$ on the raw cloth point cloud $$P$$, defined by whether the point's position along the $$z$$-axis is below the top of the bed, $$\boldsymbol{p} \in P: p_z < 0.575$$, we apply the following function to rotate the point to the 2D bed plane:
 
@@ -65,7 +68,7 @@ After rotating the overhanging cloth points, we downsample the point cloud using
 <!-- ## Performance using Dynamics Models Trained on Datasets of Various Size -->
 <!-- Referenced on Page 3, Section III-B, of the paper -->
 
-We train a dynamics model $$F(G, \bm{a}) = \Delta \hat{V}$$, based on the Graph Network-based Simulators (GNS) architecture [[3]](https://arxiv.org/abs/2002.09405), [[4]](https://arxiv.org/abs/2105.10389), that given an input graph $$G$$ that represents a cloth's initial state and a proposed action $$\bm{a}$$, predicts the displacement of the cloth $$\Delta\hat{V}$$ after execution of a cloth manipulation trajectory. We train our models over 250 epochs using the Adam optimizer with a mean squared error loss function, batch size of 100, and learning rate of 1e-4.
+We train a dynamics model $$F(G, \boldsymbol{a}) = \Delta \hat{V}$$, based on the Graph Network-based Simulators (GNS) architecture [[3]](https://arxiv.org/abs/2002.09405), [[4]](https://arxiv.org/abs/2105.10389), that given an input graph $$G$$ that represents a cloth's initial state and a proposed action $$\boldsymbol{a}$$, predicts the displacement of the cloth $$\Delta\hat{V}$$ after execution of a cloth manipulation trajectory. We train our models over 250 epochs using the Adam optimizer with a mean squared error loss function, batch size of 100, and learning rate of 1e-4.
 
 
 
@@ -76,8 +79,16 @@ We train a dynamics model $$F(G, \bm{a}) = \Delta \hat{V}$$, based on the Graph 
 
 We train six dynamics models on datasets containing 100, 500, 1000, 5000, 7500, and 10,000 input graphs, respectively. The F-scores achieved by each model when used for control are shown in the above figure. Performance saturates once the number of training samples is greater than 5000. All evaluations are conducted using the dynamics model trained on 10,000 input graphs.
 
-## Optimization Hyperparameters
+<!-- ## Determining Covered Body Parts -->
+
+
+
+
+## Optimizing Over Dynamics Models
 <!-- Referenced on Page 4, Section III-D, of the paper -->
+Following training, we use our dynamics models to predict how the state of a cloth will change when manipulated using a proposed action. We use covariance matrix adaptation evolution strategy (CMA-ES) [[5]](https://github.com/CMA-ES/pycma), to optimize over our objective funtion $$O(\chi, V_f, \bm{a})$$ (described in the paper), which allows us to identify optimal bedding manipulation trajectories to uncover people in bed in real time. We allow CMA-ES to optimize over the action space for 38 iterations using a population size of 8 (304 total function evaluations), or until $$O(\chi, V_f, \bm{a}) \geq 95$$.
+
+Optimization performance by CMA-ES can be sensitive to the initialization provided. To combat this issue, we modify the initialization based on the target limb that we are aiming to uncover. We run CMA-ES with a step-size of $$\sigma = 0.2$$
 
 
 
@@ -86,7 +97,7 @@ We train six dynamics models on datasets containing 100, 500, 1000, 5000, 7500, 
 ### Baselines Evaluated
 #### Geometric Baseline
 <!-- Referenced on Page 6, Section IV-B, of the paper -->
-This approach is founded on two assumptions that: 1) there exists a geometric relationship between the cloth and human pose that can be leveraged to uncover a blanket from part of the body and, 2) the cloth behaves like paper---pick and place actions can produce straight-line or accordion folds. To compute actions that "fold" the cloth over the body to uncover a target limb, we apply three strategies depending on the target to be uncovered
+This approach is founded on two assumptions that: 1) there exists a geometric relationship between the cloth and human pose that can be leveraged to uncover a blanket from part of the body and, 2) the cloth behaves like paper---pick and place actions can produce straight-line or accordion folds. To compute actions that "fold" the cloth over the body to uncover a target limb, we apply three strategies depending on the target to be uncovered:
 
 ##### Arms:
 Grasps the edge of the cloth, pulls towards the midline of the body on a path normal to the length of the arm  
@@ -102,9 +113,9 @@ Grasps between the shoulders, pulls toward the feet on a path that bisects the b
 For this baseline, we use proximal policy optimization (PPO), a model-free deep RL method, to train policies to uncover a single target limb as demonstrated in prior work [[5]](https://arxiv.org/abs/2109.04930). We train a single policy for each of the ten target limbs. To run PPO in the real world, we had to go through the expensive process of training a second set of policies for each target limb, this time using a different action space matching the robot's workspace in the real world.
 
 
-### Simulation
+<!-- ### Simulation -->
 
-####
+
 
 #### 2D vs. 3D Representations of the Cloth
 <!-- Referenced on Page 2, Section III-A of the paper -->
