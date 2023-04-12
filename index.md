@@ -19,8 +19,7 @@ Robotic caregivers could potentially improve the quality of life of many who req
 
 
 ## Citation
-##### ["Robust Body Exposure (RoBE): A Graph-based Dynamics Modeling Approach to Manipulating Blankets over People"]() **ADD LINk**
-
+##### ["Robust Body Exposure (RoBE): A Graph-based Dynamics Modeling Approach to Manipulating Blankets over People"](https://arxiv.org/abs/2304.04822)
 K. Puthuveetil, Sasha Wald, Atharva Pusalkar, Pratyusha Karnati, and Z. Erickson, “Robust Body Exposure (RoBE): A Graph-based Dynamics Modeling Approach to Manipulating Blankets over People,” 2023.
 
 ##### Bibtex
@@ -29,7 +28,7 @@ K. Puthuveetil, Sasha Wald, Atharva Pusalkar, Pratyusha Karnati, and Z. Erickson
       title={Bodies Uncovered: Learning to Manipulate Real Blankets Around People via Physics Simulations}, 
       author={Kavya Puthuveetil and Sasha Wald and Atharva Pusalkar and Pratyusha Karnati and Zackory Erickson},
       year={2023},
-      eprint={2109.04930 *UPDATE THIS*}, 
+      eprint={2304.04822}, 
       archivePrefix={arXiv},
       primaryClass={cs.RO}
 }
