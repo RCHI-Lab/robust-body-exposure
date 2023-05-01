@@ -45,7 +45,7 @@ Generating the actuated human model in the RoBE Bedding Manipulation environment
 ## Basics
 The RoBE Bedding Manipulation environment, built in [Assistive Gym](https://github.com/Healthcare-Robotics/assistive-gym), can be visualized using the following command:
 ```
-python3 -m assistive_gym --env BodiesUncoveredGNN-v1
+python3 -m assistive_gym --env RobustBodyExposure-v1
 ```
 
 ## Running RoBE in Simulation
