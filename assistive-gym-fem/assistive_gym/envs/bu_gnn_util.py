@@ -285,6 +285,54 @@ def get_reward(action, all_body_points, cloth_initial_2D, cloth_final_2D):
     reward = body_point_reward + reward_distance_btw_grasp_release
     return reward, covered_status
 
+# TODO - update with version used in paper
+def get_naive_action(obs, target_limb_code, data):
+    target_limb_code = 2
+    human_pose = np.reshape(obs, (-1,2))
+    all_limb_endpoints = [
+        [0], [0,1], [0,2],
+        [3], [3,4], [3,5],
+        [6], [6,7], [6,8],
+        [9], [9,10], [9,11],
+        [None], [None], [None],
+        [None]
+    ]
+    limb_endpoints = all_limb_endpoints[target_limb_code]
+    if len(limb_endpoints) == 2:
+        p1 = human_pose[limb_endpoints[0]]
+        p2 = human_pose[limb_endpoints[1]]
+        midpoint = (p1 + p2)/2 # grasp location
+        print(p1, p2, midpoint)
+
+        # coeff = np.polyfit([p1[1], p2[1]], [p1[0], p2[0]], 1)
+        # line = np.poly1d(coeff)
+
+        # axis_vector = p2-p1
+        # unit_axis_vector = axis_vector/np.linalg.norm(axis_vector)
+        dists = []
+        points = []
+        for i, p3 in enumerate(data[1]):
+            axis_vector = p1-p2
+            if target_limb_code in [3,4,5,9,10,11]: 
+                vector = axis_vector
+            else:
+                direction = [-1, 1] if target_limb_code in [6,7,8] else [1, -1]
+                vector = np.array([axis_vector[1], axis_vector[0]])*np.array(direction)
+            cloth_vector = p3[0:2]-midpoint
+            # cloth_vector = midpoint-p3[0:2] if target_limb_code in [3,4,5,9,10,11] else p3[0:2]-midpoint
+            d = np.linalg.norm(np.cross(vector, cloth_vector))/np.linalg.norm(vector) #! may want to replace midpoint with p1 for lower limbs
+
+            vector = vector/np.linalg.norm(vector)
+            cloth_vector = cloth_vector/np.linalg.norm(cloth_vector)
+            theta = np.arccos(np.clip(np.dot(vector, cloth_vector), -1.0, 1.0))
+            if d < 0.01 and p3[2]>=0.58 and theta < np.pi/2:
+                # print(theta)
+                dists.append(np.linalg.norm(midpoint-p3[0:2]))
+                points.append(p3)
+        
+    else:
+        pass
+
 #%%
 def randomize_target_limbs(tl_subset=target_limb_subset):
     # target_limb_code = np.random.randint(len(all_possible_target_limbs))

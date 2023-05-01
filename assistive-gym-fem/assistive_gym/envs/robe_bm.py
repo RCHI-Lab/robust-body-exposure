@@ -78,95 +78,15 @@ class RobustBodyExposureEnv(AssistiveEnv):
 
     def get_human_body_info(self):
         return self.human_creation.body_info if self.body_shape_var else None
-
-    def get_naive_action(self, obs, target_limb_code, data):
-        target_limb_code = 2
-        human_pose = np.reshape(obs, (-1,2))
-        all_limb_endpoints = [
-            [0], [0,1], [0,2],
-            [3], [3,4], [3,5],
-            [6], [6,7], [6,8],
-            [9], [9,10], [9,11],
-            [None], [None], [None],
-            [None]
-        ]
-        limb_endpoints = all_limb_endpoints[target_limb_code]
-        if len(limb_endpoints) == 2:
-            p1 = human_pose[limb_endpoints[0]]
-            p2 = human_pose[limb_endpoints[1]]
-            midpoint = (p1 + p2)/2 # grasp location
-            print(p1, p2, midpoint)
-
-            # coeff = np.polyfit([p1[1], p2[1]], [p1[0], p2[0]], 1)
-            # line = np.poly1d(coeff)
-
-            # axis_vector = p2-p1
-            # unit_axis_vector = axis_vector/np.linalg.norm(axis_vector)
-            dists = []
-            points = []
-            for i, p3 in enumerate(data[1]):
-                axis_vector = p1-p2
-                if target_limb_code in [3,4,5,9,10,11]: 
-                    vector = axis_vector
-                else:
-                    direction = [-1, 1] if target_limb_code in [6,7,8] else [1, -1]
-                    vector = np.array([axis_vector[1], axis_vector[0]])*np.array(direction)
-                cloth_vector = p3[0:2]-midpoint
-                # cloth_vector = midpoint-p3[0:2] if target_limb_code in [3,4,5,9,10,11] else p3[0:2]-midpoint
-                d = np.linalg.norm(np.cross(vector, cloth_vector))/np.linalg.norm(vector) #! may want to replace midpoint with p1 for lower limbs
-
-                vector = vector/np.linalg.norm(vector)
-                cloth_vector = cloth_vector/np.linalg.norm(cloth_vector)
-                theta = np.arccos(np.clip(np.dot(vector, cloth_vector), -1.0, 1.0))
-                if d < 0.01 and p3[2]>=0.58 and theta < np.pi/2:
-                    # print(theta)
-                    dists.append(np.linalg.norm(midpoint-p3[0:2]))
-                    points.append(p3)
-
-                
-            rgb = [0, 0, 0]
-            p.addUserDebugText(text=str('edge'), textPosition=points[np.argmax(dists)], textColorRGB=rgb, textSize=1, lifeTime=0, physicsClientId=self.id)
-            release = midpoint + (midpoint - points[np.argmax(dists)][0:2])
-            # p.addUserDebugText(text=str('edge'), textPosition=release, textColorRGB=[1,1,0], textSize=1, lifeTime=0, physicsClientId=self.id)
-            self.create_sphere(radius=0.01, mass=0.0, pos = list(release)+[0.9], visual=True, collision=True, rgba=[0, 1, 1, 1])
     
-
-            self.create_sphere(radius=0.01, mass=0.0, pos = list(p1)+[0.9], visual=True, collision=True, rgba=[0, 1, 0, 1])
-            self.create_sphere(radius=0.01, mass=0.0, pos = list(p2)+[0.9], visual=True, collision=True, rgba=[1, 1, 0, 1])
-            self.create_sphere(radius=0.01, mass=0.0, pos = list(midpoint)+[0.9], visual=True, collision=True, rgba=[0, 0, 0, 1])
-
-            #! CLIP GRASP AND RELEASE TO THE BED
-            
-        else:
-            pass
-        
-        # human_pose = np.reshape(obs, (-1,2))
-        # feet_midpoint = (human_pose[3] + human_pose[9])/2
-        # knee_midpoint = (human_pose[4] + human_pose[10])/2
-        # hip_midpoint = (human_pose[5] + human_pose[11])/2
-        # btw_upperchest_head_midpoint = (human_pose[12] + human_pose[13])/2
-
-        # coeff = np.polyfit([feet_midpoint[1], knee_midpoint[1]], [feet_midpoint[0], knee_midpoint[0]], 1)
-        # line = np.poly1d(coeff)
-        # # release_y = list(btw_upperchest_head_midpoint)[1]
-        # release_y = list(human_pose[13])[1]
-        # release_x = line(release_y)
-
-        # # self.create_sphere(radius=0.01, mass=0.0, pos = list(feet_midpoint)+[0.9], visual=True, collision=True, rgba=[0, 1, 0, 1])
-        # # self.create_sphere(radius=0.01, mass=0.0, pos = list(knee_midpoint)+[0.9], visual=True, collision=True, rgba=[1, 1, 0, 1])
-        # # self.create_sphere(radius=0.01, mass=0.0, pos = list(hip_midpoint)+[0.9], visual=True, collision=True, rgba=[0, 0, 0, 1])
-        # # self.create_sphere(radius=0.01, mass=0.0, pos = list(btw_upperchest_hip_midpoint)+[0.9], visual=True, collision=True, rgba=[0, 0, 0, 1])
-        # # self.create_sphere(radius=0.01, mass=0.0, pos = [release_x, release_y, 0.9], visual=True, collision=True, rgba=[1, 0, 0, 1])
-
-        # action = np.array(list(feet_midpoint) + [release_x] + [release_y])
-        # return action
-
         
     def step(self, action):
         self.execute_action = True
         obs = self._get_obs()
-        # return obs, 0, True, {}
-        # return obs, -((action[0] - 3) ** 2 + (10 * (action[1] + 2)) ** 2 + (10 * (action[2] + 2)) ** 2 + (10 * (action[3] - 3)) ** 2), 1, {}
+
+        # TODO: only used when training PPO policies for the real world, change execution conditions
+        if self.ppo:
+            action = remap_action_ppo(action, remap_ranges=[[0, 1], [-0.5, 1], [0, 1], [-1, 1]])
         
         if self.rendering:
             print(obs)
@@ -175,9 +95,6 @@ class RobustBodyExposureEnv(AssistiveEnv):
 
         # * scale bounds the 2D grasp and release locations to the area over the mattress (action nums only in range [-1, 1])
         # * if using the naive approach, do not scale the action since it is determined directly from points over the bed
-        if self.ppo:
-            action = remap_action_ppo(action, remap_ranges=[[0, 1], [-0.5, 1], [0, 1], [-1, 1]])
-
         action = scale_action(action) if not self.naive else scale_action(action, scale=[1, 1])
 
         grasp_loc = action[0:2]
@@ -186,35 +103,17 @@ class RobustBodyExposureEnv(AssistiveEnv):
         # * get points on the blanket, initial state of the cloth
         data_i = p.getMeshData(self.blanket, -1, flags=p.MESH_DATA_SIMULATION_MESH, physicsClientId=self.id)
 
-        # print(obs)
-        # self.get_naive_action(obs, 2, data_i)
-        # time.sleep(100)
-
         # * calculate distance between the 2D grasp location and every point on the blanket, anchor points are the 4 points on the blanket closest to the 2D grasp location
         dist, is_on_cloth = check_grasp_on_cloth(action, np.array(data_i[1]))
-        # * if no points on the blanket are within 2.8 cm of the grasp location, exit 
-        clipped = False
+        # * if no points on the blanket are within 2.8 cm of the grasp location, exit (if collecting data) or proceed without executing the action (in all other conditions)
         if not is_on_cloth:
-            clipped = True
-            # print("clip")
-            # return obs, 0, True, {}
             if self.collect_data:
                 return obs, 0, False, {} # for data collect
             elif self.clip:
                 self.execute_action = False
-                # return obs, 0, True, {"cloth_initial": data_i, "target_limb_code":self.target_limb_code}
-
-        if self.collect_data:
-            pass
-            # filename = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'point_cloud_data.pkl')
-            # point_cloud_params = pickle.load(open(filename,'rb'))
-            # self.point_cloud_depth_img = self.get_depth_image_for_point_cloud(
-            #     point_cloud_params['imgW'], point_cloud_params['imgH'], point_cloud_params['viewMat'], point_cloud_params['projMat'])
 
         if self.execute_action:
             anchor_idx = np.argpartition(np.array(dist), 4)[:4]
-            # for a in anchor_idx:
-                # print("anchor loc: ", data[1][a])
 
             # * update grasp_loc var with the location of the central anchor point on the cloth
             grasp_loc = np.array(data_i[1][anchor_idx[0]][0:2])
@@ -267,7 +166,7 @@ class RobustBodyExposureEnv(AssistiveEnv):
         cloth_initial_subsample = cloth_final_subsample = -1 # none for data collection
         info = {}
         if not self.collect_data:
-            #! REPLACE REWARD CALCULATION HERE WTIH FUNCTION FROM GNN_UTIL
+            # TODO - REPLACE REWARD CALCULATION HERE WTIH FUNCTION FROM GNN_UTIL
             cloth_initial_subsample, cloth_final_subsample = sub_sample_point_clouds(data_i[1], data_f[1])
             cloth_initial_2D = np.delete(np.array(cloth_initial_subsample), 2, axis = 1)
             cloth_final_2D = np.delete(np.array(cloth_final_subsample), 2, axis = 1)
