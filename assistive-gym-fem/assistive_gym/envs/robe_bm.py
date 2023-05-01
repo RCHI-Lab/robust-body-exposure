@@ -429,7 +429,7 @@ class RobustBodyExposureEnv(AssistiveEnv):
         p.changeVisualShape(self.blanket, -1, flags=p.VISUAL_SHAPE_DOUBLE_SIDED, physicsClientId=self.id)
         p.setPhysicsEngineParameter(numSubSteps=4, numSolverIterations = 4, physicsClientId=self.id)
 
-
+        # * can apply some variation in the blanket's initial position, otherwise configure over the person so that they are covered up to the shoulders/neck
         if self.blanket_pose_var:
             delta_y = self.np_random.uniform(-0.25, 0.05)
             delta_x = self.np_random.uniform(-0.02, 0.02)
