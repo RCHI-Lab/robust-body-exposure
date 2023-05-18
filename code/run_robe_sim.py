@@ -7,7 +7,9 @@ import argparse
 # import multiprocessing
 from torch import multiprocessing
 
-sys.path.insert(0, '/home/kpputhuveetil/git/vBM-GNNdev/assistive-gym-fem')
+# sys.path.insert(0, '/home/kpputhuveetil/git/vBM-GNNdev/assistive-gym-fem')
+# sys.path.insert(0, '/home/kpputhuveetil/git/vBM-GNNdev/assistive-gym-fem')
+sys.path.insert(0, './assistive-gym-fem')
 import os.path as osp
 from pathlib import Path
 
@@ -250,7 +252,7 @@ def evaluate_dyn_model(env_name, target_limb_code, trials, model, iter_data_dir,
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn')
 
-    trained_models_dir = '/home/kpputhuveetil/git/robe/robust-body-exposure/trained_models/GNN'
+    trained_models_dir = './trained_models/GNN'
 
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--eval-multiple-models', type=bool, default=False)

@@ -131,6 +131,8 @@ class GNN_Manager():
 
     def load_model_from_checkpoint(self, model_dir, model_checkpoint_number=None, batch_size=None, num_workers=None, new_save_dir=None):
         config = configparser.ConfigParser()
+
+        print('Model Config:', osp.join(model_dir, 'config.ini'))
         config.read(osp.join(model_dir, 'config.ini'))
         model_config = config['Model']
         self.set_args(model_config)
@@ -193,6 +195,7 @@ class GNN_Manager():
         print(self.checkpoints_dir)
 
         self.config_dir = osp.join(save_dir, self.model_id, 'config.ini')
+        print('Model Config:', self.config_dir)
 
         torch.manual_seed(seed)
         if torch.cuda.is_available():
