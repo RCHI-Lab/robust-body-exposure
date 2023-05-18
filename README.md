@@ -42,6 +42,12 @@ cd robust-body-exposure/assistive-gym-fem
 ```
 Generating the actuated human model in the RoBE Bedding Manipulation environment relies on SMPL-X human mesh models. In order to use these models, you will need to create an account at https://smpl-x.is.tue.mpg.de/index.html and [download](https://smpl-x.is.tue.mpg.de/download.php) the mesh models. Once downloaded, extract the file and move the entire `smplx` directory to `bodies-uncovered/assistive_gym/envs/assets/smpl_models/`. Once complete, you should have several files with this format: `bodies-uncovered/assistive_gym/envs/assets/smpl_models/smplx/SMPLX_FEMALE.npz`. This step is REQUIRED to run the RoBE Bedding Manipulation enviornment!
 
+## Download Models
+To run RoBE with our pre-trained dynamics models or to run our trained PPO policies for bedding manipulation, you will need to download them (15.5 GB) from the following link: [pre-trained dynamics models](https://drive.google.com/drive/folders/1pJbTdy3lsDDvSy7WUoEhFkFN9oaKVIUX?usp=sharing). 
+
+Once downloaded, move the unzipped `trained_models` directory (with all sub-directories also unzipped) into the `robust-body-exposure` directory. The final path to the dynamics models, for example, should be `robust-body-exposure/trained_models/GNN` 
+
+
 ## Basics
 The RoBE Bedding Manipulation environment, built in [Assistive Gym](https://github.com/Healthcare-Robotics/assistive-gym), can be visualized using the following command:
 ```
@@ -50,9 +56,11 @@ python3 -m assistive_gym --env RobustBodyExposure-v1
 
 ## Running RoBE in Simulation
 
-Lets try running an evaluation of RoBE in simulation! To optimize over a pre-trained RoBE dynamics model and uncover randomly selected target limbs over 100 simulation rollouts from the training distribution:
+Lets try running an evaluation of RoBE in simulation! All of the commands below assume that they are being run from the `robust-body-exposure` directory so please `cd` accordingly!
+
+To optimize over a pre-trained RoBE dynamics model and uncover randomly selected target limbs over 100 simulation rollouts from the training distribution:
 ```
-python3 run_robe_sim.py --model-path 'standard_2D_10k_epochs=250_batch=100_workers=4_1668718872' --graph-config 2D --env-var standard --num-rollouts 100
+python3 code/run_robe_sim.py --model-path 'standard_2D_10k_epochs=250_batch=100_workers=4_1668718872' --graph-config 2D --env-var standard --num-rollouts 100
 ```
 
 
