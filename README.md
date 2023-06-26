@@ -40,7 +40,7 @@ For more details on installing the version of Assistive Gym contained in this re
 git clone https://github.com/RCHI-Lab/robust-body-exposure.git
 cd robust-body-exposure/assistive-gym-fem
 ```
-Generating the actuated human model in the RoBE Bedding Manipulation environment relies on SMPL-X human mesh models. In order to use these models, you will need to create an account at https://smpl-x.is.tue.mpg.de/index.html and [download](https://smpl-x.is.tue.mpg.de/download.php) the mesh models. Once downloaded, extract the file and move the entire `smplx` directory to `bodies-uncovered/assistive_gym/envs/assets/smpl_models/`. Once complete, you should have several files with this format: `bodies-uncovered/assistive_gym/envs/assets/smpl_models/smplx/SMPLX_FEMALE.npz`. This step is REQUIRED to run the RoBE Bedding Manipulation enviornment!
+Generating the actuated human model in the RoBE Bedding Manipulation environment relies on SMPL-X human mesh models. In order to use these models, you will need to create an account at https://smpl-x.is.tue.mpg.de/index.html and [download](https://smpl-x.is.tue.mpg.de/download.php) the mesh models. Once downloaded, extract the file and move the entire `smplx` directory to `robust-body-exposure/assistive_gym/envs/assets/smpl_models/`. Once complete, you should have several files with this format: `robust-body-exposure/assistive_gym/envs/assets/smpl_models/smplx/SMPLX_FEMALE.npz`. This step is REQUIRED to run the RoBE Bedding Manipulation enviornment!
 
 ## Download Models
 To run RoBE with our pre-trained dynamics models or to run our trained PPO policies for bedding manipulation, you will need to download them (15.5 GB) from the following link: [pre-trained dynamics models](https://drive.google.com/drive/folders/1pJbTdy3lsDDvSy7WUoEhFkFN9oaKVIUX?usp=sharing). 
@@ -63,6 +63,13 @@ To optimize over a pre-trained RoBE dynamics model and uncover randomly selected
 python3 code/run_robe_sim.py --model-path 'standard_2D_10k_epochs=250_batch=100_workers=4_1668718872' --graph-config 2D --env-var standard --num-rollouts 100
 ```
 
+## Training New Dynamics Models
+
+Given a new dataset of cloth interactions, we can train a new dynamics model that can be used in the RoBE framework. To do so, first ensure that the raw data (in the form of pickle files) is contained in the following directory structure `robust-body-exposure/DATASETS/<YOUR-DATASET-NAME>/raw`. Once the raw data is in the right location, we can process the data for training (if needed) and actually execute training using the following command, which, in this example, trains a model using 10k training samples:
+```
+python3 code/train_gnns.py --dataset-name <YOUR-DATASET-NAME> --dataset-desc <YOUR-DATASET-DESCRIPTION> --model-name <YOUR-MODEL-NAME> --num-train-samp 10000
+```
+Where the `--dataset-desc` flag is usually used to specify processing parameters (whether overhanging blanket points are rotated, if using a 3D representation of the cloth, etc.)
 
 
 
