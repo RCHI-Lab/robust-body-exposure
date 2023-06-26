@@ -17,7 +17,8 @@ obs_limbs = [18, 16, 14, 39, 36, 35, 28, 26, 24, 46, 43, 42, 8, 32]
 #! added for bedding manipulation
 #? can the chest be removed? alignment is less reliable with large pose variation and there is a lot of overlap with points on upperchest and waist anyway
 # limbs = [18, 16, 14, 39, 36, 35, 28, 26, 24, 46, 43, 42]
-limbs = [18, 16, 14, 39, 36, 35, 28, 26, 24, 46, 43, 42, 2, 5, 8, 32]
+# limbs = [18, 16, 14, 39, 36, 35, 28, 26, 24, 46, 43, 42, 2, 5, 8, 32]
+limbs = [18, 16, 14, 39, 36, 35, 28, 26, 24, 46, 43, 42, 2, 5, 8, 32, 33, 11, 21, 29]
 
 class Human(Agent):
     def __init__(self, controllable_joint_indices, controllable=False):
@@ -48,6 +49,8 @@ class Human(Agent):
         self.left_thigh = 42
         self.left_shin = 43
         self.left_foot = 46
+
+        self.hips = 33
 
         self.j_waist_x, self.j_waist_y, self.j_waist_z = 0, 1, 2
         self.j_chest_x, self.j_chest_y, self.j_chest_z = 3, 4, 5
@@ -154,27 +157,34 @@ class Human(Agent):
         self.pecs_offset = human_creation.pecs_offset
 
         #! ADDED FOR BEDDING MANIPULATION TASK
-        self.limbs_need_corrections = [self.right_thigh, self.right_shin, self.right_foot, self.right_hand, self.left_thigh, self.left_shin, self.left_hand, self.left_foot, self.waist, self.chest, self.upper_chest]
+        self.limbs_need_corrections = [
+            self.right_thigh, self.right_shin, self.right_foot, self.right_hand, self.right_pecs,
+            self.left_thigh, self.left_shin, self.left_hand, self.left_foot, self.left_pecs,
+            self.waist, self.chest, self.upper_chest, self.hips, self.neck
+            ]
         self.body_info = {
-            self.waist: (human_creation.body_info['waist'], [-0.15,-0.03,0], [0, -np.pi/2.0, -np.pi/2.0]),
+            # self.waist: (human_creation.body_info['waist'], [-0.15,-0.03,0], [0, -np.pi/2.0, -np.pi/2.0]),
+            self.waist: (human_creation.body_info['waist'], [-0.15,-0.03,0], [0, -np.pi/2.0, -np.pi/3.0]),
             self.chest: (human_creation.body_info['chest'], [-0.15,-0.05,0.025], [0,-np.pi/2.0,-np.pi/1.6]),
             self.upper_chest: (human_creation.body_info['upperchest'], [-0.15,-0.06,0.025], [0,0,-np.pi/2.0]),
-            self.right_pecs: human_creation.body_info['pecs'],
+            self.right_pecs: (human_creation.body_info['pecs'], [-0.06,-0.03,0], [0, 0, -np.pi/2.0]),
             self.right_upperarm: human_creation.body_info['upperarm'],
             self.right_forearm: human_creation.body_info['forearm'],
             self.right_hand: (human_creation.body_info['hand'], [0,human_creation.body_info['hand'][1], 0], 0),
-            self.left_pecs: human_creation.body_info['pecs'],
+            self.left_pecs: (human_creation.body_info['pecs'], [0.06,-0.03,0], [0, 0, np.pi/2.0]),
             self.left_upperarm: human_creation.body_info['upperarm'],
             self.left_forearm: human_creation.body_info['forearm'],
             self.left_hand: (human_creation.body_info['hand'], [0,human_creation.body_info['hand'][1], 0], 0),
-            self.neck: human_creation.body_info['neck'],
+            self.neck: (human_creation.body_info['neck'], [0,0,0], [0,0, np.pi]),
             self.head: human_creation.body_info['head'],
             self.right_thigh: (human_creation.body_info['thigh'], [human_creation.body_info['thigh'][1]/4, 0, 0], [np.pi/60.0, 0, 0]),
             self.right_shin: (human_creation.body_info['shin'], 0, [np.pi/30.0, 0, 0]),
             self.right_foot: (human_creation.body_info['foot'], [human_creation.body_info['foot'][1]/3, human_creation.body_info['foot'][1]/3, 0], [-np.pi/2.0, 0, 0]),
             self.left_thigh: (human_creation.body_info['thigh'], [-human_creation.body_info['thigh'][1]/4, 0, 0], [np.pi/60.0, 0, 0]),
             self.left_shin: (human_creation.body_info['shin'], 0,[np.pi/30.0, np.pi/60.0, 0]),
-            self.left_foot: (human_creation.body_info['foot'], [-human_creation.body_info['foot'][1]/3, human_creation.body_info['foot'][1]/3, 0], [-np.pi/2.0, 0, 0])}
+            self.left_foot: (human_creation.body_info['foot'], [-human_creation.body_info['foot'][1]/3, human_creation.body_info['foot'][1]/3, 0], [-np.pi/2.0, 0, 0]),
+            self.hips: (human_creation.body_info['hips'], [0.07,0,0], [0, 0, np.pi/2.0])
+            }
 
         super(Human, self).init(self.body, id, np_random, self.controllable_joint_indices)
 

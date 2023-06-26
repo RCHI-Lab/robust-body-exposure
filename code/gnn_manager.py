@@ -173,7 +173,7 @@ class GNN_Manager():
             self.model.load_state_dict(torch.load(checkpoint_path)['model'])
         self.model_criterion = torch.nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
-        self.optimizer.load_state_dict(torch.load(checkpoint_path)['optimizer'])
+        self.optimizer.load_state_dict(torch.load(checkpoint_path, map_location=torch.device('cpu'))['optimizer'])
         self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', factor=0.8, patience=3, verbose=True)
     
     def delete_model(self):

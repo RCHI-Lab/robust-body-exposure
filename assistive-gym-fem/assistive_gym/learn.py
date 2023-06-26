@@ -7,10 +7,11 @@ from ray.tune.logger import pretty_print
 from numpngw import write_apng
 import pathlib, pickle,time
 import keras
+sys.path.append("./")
+sys.path.append("/env")
+
 from .envs.bu_gnn_util import *
 from tqdm import tqdm
-
-
 
 def setup_config(env, algo, coop=False, seed=0, extra_configs={}, num_processes=None):
     if num_processes is None:

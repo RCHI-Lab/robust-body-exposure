@@ -232,73 +232,96 @@ def get_body_point_colors(initial_covered_status, covered_status):
     
     return point_colors
 
-def generate_figure(tl, action, body_info, all_body_points, cloth_initial, final_cloths, initial_covered_status, covered_statuses, fscores, plot_initial=False, compare_subplots=False, transparent=False, draw_axes =False):
-    
-    # point_colors_sim = get_body_point_colors(initial_covered_status, covered_statuses[0])
-    # point_colors_cma = get_body_point_colors(initial_covered_status, covered_statuses[1])
-    # point_colors = [point_colors_sim, point_colors_cma]
-    
-    # print(point_colors_sim == point_colors_cma)
-    
+# TODO: take in initial cloth state and both final cloth states, all body points, action
+def generate_figure(action, all_body_points, cloth_initial, cloth_intermediate, cloth_final, plot_initial=False, compare_subplots=False, transparent=False, draw_axes=False):  
     scale = 4
-    num_subplots = 2 if compare_subplots else 1
+    num_subplots = 3 if compare_subplots else 1
     bg_color = 'rgba(0,0,0,0)' if transparent else 'rgba(255,255,255,1)'
     
     # fig = go.Figure()
     fig = make_subplots(rows=1, cols=num_subplots)
     arrows = []
+    
     for i in range(num_subplots):
 
-        point_colors = get_body_point_colors(initial_covered_status, covered_statuses[i])
-
         # print(i)
-        # * For bed plotting
-        # fig.add_shape(type="rect",
-        #     x0=0.44, y0=1.05, x1=-0.44, y1=-1.05,
-        #     line=dict(color='rgb(163, 163, 163)'), fillcolor = 'rgb(163, 163, 163)', opacity=0.2, layer='below', row=1, col=i+1)
+        #* For bed plotting
+        fig.add_shape(type="rect",
+            x0=0.44, y0=1.05, x1=-0.44, y1=-1.05,
+            line=dict(color='rgb(163, 163, 163)'), fillcolor = 'rgb(163, 163, 163)', opacity=0.2, layer='below', row=1, col=i+1)
 
+        #Light Blue
         if plot_initial:
             fig.add_trace(
                 go.Scatter(mode='markers',
                            x = cloth_initial[:,0],
                            y = cloth_initial[:,1],
                            showlegend = False,
-                           marker=dict(color = 'rgba(99, 190, 242, 0.3)', size = 9)), row=1, col=i+1)
+                           marker=dict(color = 'rgba(99, 190, 242, 0.3)', size = 9)), row=1, col=1)
+
+        # TODO: don't need to change point colors based on covered/uncovered
         fig.add_trace(
             go.Scatter(mode='markers',
                        x = all_body_points[:,0],
                        y = all_body_points[:,1],
-                       marker=dict(color = point_colors, size = 10),
-                       showlegend=False), row=1, col=i+1)
+                       showlegend=False,
+                       marker=dict(color = 'rgba(240, 30, 200, 1)')), row=1, col=i+1)
+
+        #Dark Blue
         fig.add_trace(
             go.Scatter(mode='markers',
-                       x = final_cloths[i][:,0],
-                       y = final_cloths[i][:,1],
+                x = cloth_intermediate[:,0],
+                y = cloth_intermediate[:,1],
+                showlegend = False,
+                marker=dict(color = 'rgba(99, 190, 242, 0.3)', size = 9)), row=1, col=2)
+
+        fig.add_trace(
+            go.Scatter(mode='markers',
+                       x = cloth_final[:,0],
+                       y = cloth_final[:,1],
                        showlegend = False,
-                       marker=dict(color = 'rgba(38, 60, 201, 0.5)', size = 9)), row=1, col=i+1)
+                       marker=dict(color = 'rgba(99, 190, 242, 0.3)', size = 9)), row=1, col=3)
         fig.add_trace(
             go.Scatter(mode='markers',
                        x = [action[0]], y = [action[1]], showlegend = False, marker=dict(color = 'rgba(0,0,0,1)', size = 12)),
-                       row=1, col=i+1)
-        
-        action_arrow = go.layout.Annotation(dict(
+                       row=1, col=[1])
+        fig.add_trace(
+            go.Scatter(mode='markers',
+                       x = [action[2]], y = [action[3]], showlegend = False, marker=dict(color = 'rgba(0,0,0,1)', size = 12)),
+                       row=1, col=[2])
+        # if plotting more than one action arrow turns out to be annoying don't worry about it
+        action_arrow_initial = go.layout.Annotation(dict(
                         ax=action[0],
                         ay=action[1],
-                        xref=f"x{i+1}", yref=f"y{i+1}",
+                        xref=f"x{1}", yref=f"y{1}",
                         text="",
                         showarrow=True,
-                        axref=f"x{i+1}", ayref=f"y{i+1}",
+                        axref=f"x{1}", ayref=f"y{1}",
                         x=action[2],
                         y=action[3],
                         arrowhead=3,
                         arrowwidth=4,
                         arrowcolor='rgb(0,0,0)'))
-        arrows.append(action_arrow)
+        action_arrow_intermediate = go.layout.Annotation(dict(
+                        ax=action[2],
+                        ay=action[3],
+                        xref=f"x{2}", yref=f"y{2}",
+                        text="",
+                        showarrow=True,
+                        axref=f"x{2}", ayref=f"y{2}",
+                        x=action[0],
+                        y=action[1],
+                        arrowhead=3,
+                        arrowwidth=4,
+                        arrowcolor='rgb(0,0,0)'))
+        arrows += [action_arrow_initial, action_arrow_intermediate]
         fig.update_xaxes(autorange="reversed", visible=draw_axes, row=1, col=i+1)
         fig.update_yaxes(autorange="reversed", visible=draw_axes, row=1, col=i+1)
     
-    fig.update_layout(width=140*scale, height=195*scale,plot_bgcolor=bg_color, paper_bgcolor=bg_color,annotations=arrows,
-                         title={'text': f"Target: {target_names[tl]}<br>F-Score = {fscores[0]:.2f}",'y':0.05,'x':0.5,'xanchor': 'center','yanchor': 'bottom'})
+    fig.update_layout(width=140*3*scale, height=195*scale,plot_bgcolor=bg_color, paper_bgcolor=bg_color,annotations=arrows,
+                         title={'text': f"", 'y':0.05,'x':0.5,'xanchor': 'center','yanchor': 'bottom'})
 
     # fig.show()
     return fig
+
+    

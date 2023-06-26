@@ -294,21 +294,22 @@ class HumanCreation:
         # adjusted values based on what was used to create capsules
         waist_radius=waist_radius/2.0
         chest_radius=chest_radius/2.0
+        hips_radius=hips_radius/2.0
         upperchest_radius=upperchest_radius/2.0
         reduce_length = 0.8
 
         self.body_info = {
             'head': (-head_length, head_length/1.8),
             'hand': (0, hand_radius),
-            'pecs': (pecs_length, pecs_radius),
-            'neck': (neck_length, neck_radius),
+            'pecs': (pecs_length*1.9, pecs_radius*1.1),
+            'neck': (neck_length*0.8, neck_radius),
             'upperchest': (upperchest_length*reduce_length, upperchest_radius),
             'chest': (chest_length*reduce_length, chest_radius),
             'waist': (waist_length*reduce_length, waist_radius),
-            'hips': (hips_length, hips_radius),
+            'hips': (hips_length*reduce_length, hips_radius),
             'upperarm': (upperarm_length, upperarm_radius),
             'forearm': (forearm_length, forearm_radius),
-            'thigh': (thigh_length, thigh_radius),
+            'thigh': (thigh_length*1.2, thigh_radius),  #! MAKE SURE ADJUSTMENT HERE DOESN'T IMPACT VIRTUAL POINT CREATION IN BM_GNN_UTIL
             'shin': (shin_length, shin_radius),
             'foot': (foot_length, foot_radius)}
 

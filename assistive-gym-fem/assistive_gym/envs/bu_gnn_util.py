@@ -41,6 +41,21 @@ obs_limbs = {
     42:[[10,11], 'thigh'],      # left thigh: knee -> hip
     8:[[12], ('upperchest', 'waist')],     # upperchest
     32:[[13], 'head']}          # head
+# obs_limbs = {
+#     21:[[60], 'hand'],           # right hand: wrist
+#     19:[[54,55], 'forearm'],      # right forearm: wrist -> elbow
+#     17:[[51,52], 'upperarm'],     # right upperarm: elbow -> shoulder
+#     8:[[21], 'foot'],           # right foot: ankle
+#     5:[[12,13], 'shin'],         # right shin: ankle -> knee
+#     2:[[3,4], 'thigh'],        # right thigh: knee -> hip
+#     20:[[57], 'hand'],           # left hand: wrist
+#     18:[[51,52], 'forearm'],      # left forearm: wrist -> elbow
+#     16:[[43,44], 'upperarm'],     # left upperarm: elbow -> shoulder
+#     7:[[18], 'foot'],           # left foot: ankle
+#     4:[[9,10], 'shin'],        # left shin: ankle -> knee
+#     1:[[0,1], 'thigh'],      # left thigh: knee -> hip
+#     6:[[12], ('upperchest', 'waist')],     # upperchest
+#     15:[[13], 'head']}          # head
 
 # indices of human_pose (from obs) that give the x,y pose of the joints that define the target body part
 # index to select target limb
@@ -163,6 +178,38 @@ def get_body_points_from_obs(human_pose, target_limb_code, body_info = None):
     # return np.concatenate(target_points), np.concatenate(nontarget_points)
 
 #%%
+def sub_sample_point_clouds_recover(cloth_initial_3D_pos, cloth_intermediate_3D_pos, cloth_final_3D_pos, voxel_size = 0.05):
+    "https://towardsdatascience.com/how-to-automate-lidar-point-cloud-processing-with-python-a027454a536c"
+
+    cloth_initial = np.array(cloth_initial_3D_pos)
+    cloth_intermediate = np.array(cloth_intermediate_3D_pos)
+    cloth_final = np.array(cloth_final_3D_pos)
+
+    nb_vox=np.ceil((np.max(cloth_initial, axis=0) - np.min(cloth_initial, axis=0))/voxel_size)
+    non_empty_voxel_keys, inverse, nb_pts_per_voxel = np.unique(((cloth_initial - np.min(cloth_initial, axis=0)) // voxel_size).astype(int), axis=0, return_inverse=True, return_counts=True)
+    idx_pts_vox_sorted=np.argsort(inverse)
+
+    voxel_grid={}
+    voxel_grid_cloth_inds={}
+    cloth_initial_subsample=[]
+    cloth_intermediate_subsample=[]
+    cloth_final_subsample = []
+    last_seen=0
+
+    for idx,vox in enumerate(non_empty_voxel_keys):
+        voxel_grid[tuple(vox)]= cloth_initial[idx_pts_vox_sorted[last_seen:last_seen+nb_pts_per_voxel[idx]]]
+        voxel_grid_cloth_inds[tuple(vox)] = idx_pts_vox_sorted[last_seen:last_seen+nb_pts_per_voxel[idx]]
+        
+        closest_point_to_barycenter = np.linalg.norm(voxel_grid[tuple(vox)] - np.mean(voxel_grid[tuple(vox)],axis=0),axis=1).argmin()
+        cloth_initial_subsample.append(voxel_grid[tuple(vox)][closest_point_to_barycenter])
+        cloth_intermediate_subsample.append(voxel_grid[tuple(vox)][closest_point_to_barycenter])
+        cloth_final_subsample.append(cloth_final[voxel_grid_cloth_inds[tuple(vox)][closest_point_to_barycenter]])
+
+        last_seen+=nb_pts_per_voxel[idx]
+    # print(len(cloth_initial_subsample), len(cloth_final_subsample))
+    
+    return cloth_initial_subsample, cloth_intermediate_subsample, cloth_final_subsample
+
 def sub_sample_point_clouds(cloth_initial_3D_pos, cloth_final_3D_pos, voxel_size = 0.05):
     "https://towardsdatascience.com/how-to-automate-lidar-point-cloud-processing-with-python-a027454a536c"
 
@@ -280,7 +327,7 @@ def get_body_points_reward(all_body_points, cloth_initial_2D, cloth_final_2D):
     return reward, covered_status
 
 def get_reward(action, all_body_points, cloth_initial_2D, cloth_final_2D):
-    reward_distance_btw_grasp_release = -150 if np.linalg.norm(action[0:2] - action[2:]) >= 1.5 else 0
+    reward_distance_btw_grasp_release = -150 if np.linalg.norm(np.array(action[0:2]) - np.array(action[2:])) >= 1.5 else 0
     body_point_reward, covered_status = get_body_points_reward(all_body_points, cloth_initial_2D, cloth_final_2D)
     reward = body_point_reward + reward_distance_btw_grasp_release
     return reward, covered_status
@@ -358,6 +405,57 @@ def check_grasp_on_cloth(action, cloth_initial, clipping_thres=0.028):
     # * if no points on the blanket are within 2.8 cm of the grasp location, clip
     is_on_cloth = (np.any(np.array(dist) < clipping_thres)) 
     return dist, is_on_cloth
+
+def euclidian_distance(point, other):
+     return ((a - b) ** 2 for a, b in zip(point, other)) ** 0.5
+
+def check_height_of_effector(effector_pos, body_points, min_threshold, max_threshold, line_threshold):
+    #Get highest point on body
+    #Do highest z in radius
+    # highest = np.max(body_points[:,2])
+
+    #Get distance between all x, y points and effector x, y position
+    dist = np.linalg.norm(effector_pos[:2] - body_points[:,:2], axis=1)
+
+    #Get indexes of 20 closest y points
+    closest_points = np.argpartition(dist, 10)[:10]
+
+    highest = np.max(body_points[closest_points,2])
+
+    #Only take points that are within some threshold distance
+    suitable_points = closest_points #[index for index in closest_points if dist[index] < line_threshold]
+    delta_z = 0
+    
+    if len(suitable_points) > 3:
+        #Get highest z point of those points    
+        max_point_z = np.max(body_points[suitable_points, 2])
+        
+        if ((effector_pos[2]-max_point_z) < min_threshold):
+            delta_z = min_threshold - (effector_pos[2]-max_point_z)
+
+        if ((effector_pos[2]-max_point_z) > max_threshold):
+            delta_z = max_threshold - (effector_pos[2]-max_point_z)
+    # #If there are no points within a certain threshold then move to the highest point on the body
+    # else:
+    #     print('[]')
+    #     if ((effector_pos[2]-highest) < min_threshold):
+    #         delta_z = min_threshold - (effector_pos[2]-highest)
+
+    #     if ((effector_pos[2]-highest) > max_threshold):
+    #         delta_z = max_threshold - (effector_pos[2]-highest)
+    
+    return np.clip(delta_z, -.005, .005)
+
+def release_height_of_effector(effector_pos, body_points, release_threshold):
+    dist = np.linalg.norm(body_points - effector_pos[0], axis=1)
+    min_point_z = body_points[np.argmin(dist)][2]
+
+    delta_z = 0
+
+    if ((effector_pos[2]-min_point_z) > release_threshold):
+        delta_z = release_threshold - (effector_pos[2]-min_point_z)
+
+    return delta_z
 
 #%%
 def get_edge_connectivity(cloth_initial, edge_threshold, cloth_dim):

@@ -505,14 +505,15 @@ class BeddingManipulationEnv(AssistiveEnv):
             # *     creates all the spheres necessary to uniformly cover the body part (spheres created at some arbitrary position (transformed to correct location in update_points_along_body())
             # *     add to running total of target/nontarget points
             # *     only generate sphere bodies if self.rendering == True
-            if limb in self.target_limb:
-                if limb in [self.human.left_hand, self.human.right_hand]:
-                    self.points_pos_on_target_limb[limb] = self.util.sphere_points(radius=radius, samples = 20)
-                else:
-                    self.points_pos_on_target_limb[limb] = self.util.capsule_points(p1=np.array([0, 0, 0]), p2=np.array([0, 0, -length]), radius=radius, distance_between_points=0.03)
-                if self.rendering:
-                    self.points_target_limb[limb] = self.create_spheres(radius=0.01, mass=0.0, batch_positions=[[0, 0, 0]]*len(self.points_pos_on_target_limb[limb]), visual=True, collision=False, rgba=[1, 1, 1, 1])
-                self.total_target_point_count += len(self.points_pos_on_target_limb[limb])
+            if hasattr(self.human, "target_limb"):
+                if limb in self.target_limb:
+                    if limb in [self.human.left_hand, self.human.right_hand]:
+                        self.points_pos_on_target_limb[limb] = self.util.sphere_points(radius=radius, samples = 20)
+                    else:
+                        self.points_pos_on_target_limb[limb] = self.util.capsule_points(p1=np.array([0, 0, 0]), p2=np.array([0, 0, -length]), radius=radius, distance_between_points=0.03)
+                    if self.rendering:
+                        self.points_target_limb[limb] = self.create_spheres(radius=0.01, mass=0.0, batch_positions=[[0, 0, 0]]*len(self.points_pos_on_target_limb[limb]), visual=True, collision=False, rgba=[1, 1, 1, 1])
+                    self.total_target_point_count += len(self.points_pos_on_target_limb[limb])
             else:
                 if limb in [self.human.left_hand, self.human.right_hand]:
                     self.points_pos_on_nontarget_limb[limb] = self.util.sphere_points(radius=radius, samples = 20)
@@ -521,6 +522,7 @@ class BeddingManipulationEnv(AssistiveEnv):
                 if self.rendering:
                     self.points_nontarget_limb[limb] = self.create_spheres(radius=0.01, mass=0.0, batch_positions=[[0, 0, 0]]*len(self.points_pos_on_nontarget_limb[limb]), visual=True, collision=False, rgba=[0, 0, 1, 1])
                 self.total_nontarget_point_count += len(self.points_pos_on_nontarget_limb[limb])
+                # print("COUNT", self.total_nontarget_point_count)
 
         # * transforms the generated spheres to the correct coordinate space (aligns points to the limbs)
         self.update_points_along_body()
@@ -547,13 +549,14 @@ class BeddingManipulationEnv(AssistiveEnv):
             # * transform target/nontarget point positions to the world coordinate system so they align with the body parts
             points_pos_limb_world = []
 
-            if limb in self.target_limb:
-                for i in range(len(self.points_pos_on_target_limb[limb])):
-                    point_pos = np.array(p.multiplyTransforms(limb_pos, limb_orient, self.points_pos_on_target_limb[limb][i], [0, 0, 0, 1], physicsClientId=self.id)[0])
-                    points_pos_limb_world.append(point_pos)
-                    if self.rendering:
-                        self.points_target_limb[limb][i].set_base_pos_orient(point_pos, [0, 0, 0, 1])
-                self.points_pos_target_limb_world[limb] = points_pos_limb_world
+            if hasattr(self.human, "target_limb"):
+                if limb in self.target_limb:
+                    for i in range(len(self.points_pos_on_target_limb[limb])):
+                        point_pos = np.array(p.multiplyTransforms(limb_pos, limb_orient, self.points_pos_on_target_limb[limb][i], [0, 0, 0, 1], physicsClientId=self.id)[0])
+                        points_pos_limb_world.append(point_pos)
+                        if self.rendering:
+                            self.points_target_limb[limb][i].set_base_pos_orient(point_pos, [0, 0, 0, 1])
+                    self.points_pos_target_limb_world[limb] = points_pos_limb_world
             else:
                 for i in range(len(self.points_pos_on_nontarget_limb[limb])):
                     point_pos = np.array(p.multiplyTransforms(limb_pos, limb_orient, self.points_pos_on_nontarget_limb[limb][i], [0, 0, 0, 1], physicsClientId=self.id)[0])
@@ -561,6 +564,7 @@ class BeddingManipulationEnv(AssistiveEnv):
                     if self.rendering:
                         self.points_nontarget_limb[limb][i].set_base_pos_orient(point_pos, [0, 0, 0, 1])
                 self.points_pos_nontarget_limb_world[limb] = points_pos_limb_world
+                
 
     def increase_pose_variation(self):
         '''

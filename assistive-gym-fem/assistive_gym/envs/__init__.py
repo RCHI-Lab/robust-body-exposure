@@ -17,3 +17,7 @@ from assistive_gym.envs.bedding_manipulation_envs import BeddingManipulationSphe
 from assistive_gym.envs.remove_contact_envs import RemoveContactSphereEnv
 from assistive_gym.envs.human_smplx_testing import HumanSMPLXTestingEnv
 from assistive_gym.envs.robe_bm import RobustBodyExposureEnv
+
+from assistive_gym.envs.reaching_robots import ReachingPR2Env, ReachingJacoEnv, ReachingPR2HumanEnv, ReachingJacoHumanEnv
+
+from assistive_gym.envs.robe_bm_reversible import RobeReversibleEnv

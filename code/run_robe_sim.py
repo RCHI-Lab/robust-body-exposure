@@ -274,15 +274,18 @@ if __name__ == '__main__':
     
     else:
 
+        # loop_data = [
+        #     {'model': 'standard_2D_10k_epochs=250_batch=100_workers=4_1668718872', 'graph_config': '2D', 'env_var': 'standard', 'max_fevals':300},
+        #     {'model': 'standard_3D_10k_epochs=250_batch=100_workers=4_1675341883', 'graph_config': '3D', 'env_var': 'combo_var', 'max_fevals':300},
+        #     {'model': 'standard_3D_10k_epochs=250_batch=100_workers=4_1675341883', 'graph_config': '3D', 'env_var': 'standard', 'max_fevals':150},
+        #     {'model': 'standard_3D_10k_epochs=250_batch=100_workers=4_1675341883', 'graph_config': '3D', 'env_var': 'combo_var', 'max_fevals':150},
+
+        # ]
         loop_data = [
-            {'model': 'standard_2D_10k_epochs=250_batch=100_workers=4_1668718872', 'graph_config': '2D', 'env_var': 'standard', 'max_fevals':300},
-            {'model': 'standard_3D_10k_epochs=250_batch=100_workers=4_1675341883', 'graph_config': '3D', 'env_var': 'combo_var', 'max_fevals':300},
-            {'model': 'standard_3D_10k_epochs=250_batch=100_workers=4_1675341883', 'graph_config': '3D', 'env_var': 'standard', 'max_fevals':150},
-            {'model': 'standard_3D_10k_epochs=250_batch=100_workers=4_1675341883', 'graph_config': '3D', 'env_var': 'combo_var', 'max_fevals':150},
-
+                    {'model' : 'standard_2D_0.1k_epochs=250_batch=100_workers=4_1672747276'},
+                    {'model' : 'standard_2D_0.5k_epochs=250_batch=100_workers=4_1672747003'}
         ]
-
-    env_name = "RobustBodyExposure-v1"
+    env_name = "RobeReversible-v1"
     target_limb_code = None
 
     for i in range(len(loop_data)):
@@ -316,7 +319,7 @@ if __name__ == '__main__':
 
         iterations = 10
 
-        num_processes = trials = 50
+        num_processes = trials = 1
 
         iterations = round(args.num_rollouts/num_processes)
 

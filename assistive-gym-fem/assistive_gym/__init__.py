@@ -20,6 +20,33 @@ for task in ['ScratchItch', 'Feeding']:
         )
 
 register(
+    id='RobeReversible-v1',
+    entry_point='assistive_gym.envs:RobeReversibleEnv',
+    max_episode_steps=200,
+)
+
+register(
+    id='ReachingPR2-v0',
+    entry_point='assistive_gym.envs:ReachingPR2Env',
+    max_episode_steps=200,
+)
+register(
+    id='ReachingJaco-v0',
+    entry_point='assistive_gym.envs:ReachingJacoEnv',
+    max_episode_steps=200,
+)
+register(
+    id='ReachingPR2Human-v0',
+    entry_point='assistive_gym.envs:ReachingPR2HumanEnv',
+    max_episode_steps=200,
+)
+register(
+    id='ReachingJacoHuman-v0',
+    entry_point='assistive_gym.envs:ReachingJacoHumanEnv',
+    max_episode_steps=200,
+)
+
+register(
     id='DressingPR2Mesh-v1',
     entry_point='assistive_gym.envs:DressingPR2MeshEnv',
     max_episode_steps=200,

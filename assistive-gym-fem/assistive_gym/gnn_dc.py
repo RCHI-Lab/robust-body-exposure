@@ -1,6 +1,6 @@
 import gym, sys, argparse, multiprocessing, time, os, math
 from gym.utils import seeding
-from .learn import make_env
+from learn import make_env
 import numpy as np
 import pickle, pathlib
 
@@ -11,7 +11,7 @@ def sample_action(env):
 def gnn_data_collect(env_name, i):
     coop = 'Human' in env_name
     seed = seeding.create_seed()
-    env = make_env(env_name, coop=coop, seed=seed)
+    env = make_env(env_name, coop=coop, seed=0)
     env.set_env_variations(
         collect_data = True,
         blanket_pose_var = False,
@@ -22,9 +22,16 @@ def gnn_data_collect(env_name, i):
     # env.render()
     observation = env.reset()
     pid = os.getpid()
+
+    num_rollouts = 100
+    np.random.seed(0)
+    actions = np.random.uniform(-1, 1, size=(num_rollouts, 4))
+
     while not done:
-        action = sample_action(env)
+        #action = sample_action(env)
+        #action = np.array([0, 0, -.2, -.5])
         # action = np.array([0,0,0,0])
+        action = actions[i]
         observation, reward, done, info = env.step(action)
     
     filename = f"c{i}_{seed}_pid{pid}"
@@ -46,11 +53,11 @@ def counter_callback(output):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Data collection for gnn training')
-    parser.add_argument('--env', default='BodiesUncoveredGNN-v1')
+    parser.add_argument('--env', default='RobeReversible-v1')
     args = parser.parse_args()
 
     current_dir = os.getcwd()
-    variation_type = 'body_shape_var'
+    variation_type = 'DC_Fixed_Bed_Height_40cm'
     pkl_loc = os.path.join(current_dir, variation_type, 'raw')
     pathlib.Path(pkl_loc).mkdir(parents=True, exist_ok=True)
 
@@ -64,7 +71,7 @@ if __name__ == "__main__":
     num_processes = 100
 
     # num data points to collect
-    trials = 60000
+    trials = 10,100
 
     # trials = 1
     # num_processes = 1
