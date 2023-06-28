@@ -31,7 +31,7 @@ class RobeReversibleEnv(AssistiveEnv):
         
         self.data_intermediate = []
 
-        self.release_threshold = .2
+        self.release_threshold = .05
         self.lower_before_release = False
 
         self.points_pos_limb_world = []
@@ -200,16 +200,22 @@ class RobeReversibleEnv(AssistiveEnv):
                 current_pos = self.sphere_ee.get_base_pos_orient()[0]
                 
             # * continue stepping simulation to allow the cloth to settle before release
-            for _ in range(20):
-                p.stepSimulation(physicsClientId=self.id)
+            # for _ in range(20):
+            #     p.stepSimulation(physicsClientId=self.id)
 
             if self.lower_before_release:
                 current_pos = self.sphere_ee.get_base_pos_orient()[0]
                 delta_z = release_height_of_effector(np.array(current_pos), np.array(self.points_pos_limb_world), self.release_threshold)      
-                self.sphere_ee.set_base_pos_orient(current_pos + np.array([0, 0, delta_z]), np.array([0,0,0]))
-                for _ in range(50):
+                #self.sphere_ee.set_base_pos_orient(current_pos + np.array([0, 0, delta_z]), np.array([0,0,0]))
+                final_z = current_pos[2] + delta_z
+                print(delta_z, final_z, current_pos[2])
+                while current_pos[2] >= final_z:
+                    self.sphere_ee.set_base_pos_orient(current_pos - np.array([0, 0, 0.005]), np.array([0,0,0]))
                     p.stepSimulation(physicsClientId=self.id)
-
+                    current_pos = self.sphere_ee.get_base_pos_orient()[0]
+                
+            for _ in range(20):
+                p.stepSimulation(physicsClientId=self.id)
             # * release the cloth at the release point, sphere is at the same arbitrary z position in the air
             for i in constraint_ids:
                 p.removeConstraint(i, physicsClientId=self.id)
@@ -678,7 +684,7 @@ class RobeReversibleEnv(AssistiveEnv):
         self.setup_camera_rpy(camera_target=[0, 0, 0.305+2.101], distance=0.01, rpy=[0, -90, 180], fov=60, camera_width=468//2, camera_height=410)
         img, depth = self.get_camera_image_depth()
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        var_type = f"Test"
+        var_type = f"Fixed_Body_Height_5cm"
         filename = f'top_view_{state}_{iteration}.png'
         img_dir = osp.join(os.getcwd(), var_type)
         Path(img_dir).mkdir(parents=True, exist_ok=True)

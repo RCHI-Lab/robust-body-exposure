@@ -447,13 +447,18 @@ def check_height_of_effector(effector_pos, body_points, min_threshold, max_thres
     return np.clip(delta_z, -.005, .005)
 
 def release_height_of_effector(effector_pos, body_points, release_threshold):
-    dist = np.linalg.norm(body_points - effector_pos[0], axis=1)
-    min_point_z = body_points[np.argmin(dist)][2]
+    #Get distance between effector and body points
+    dist = np.linalg.norm(effector_pos[:2] - body_points[:,:2], axis=1)
+    #Get 10 closest points
+    closest_points = np.argpartition(dist, 10)[:10]
+
+    #Get the highest point on the body
+    max_point_z = np.max(body_points[closest_points, 2])
 
     delta_z = 0
 
-    if ((effector_pos[2]-min_point_z) > release_threshold):
-        delta_z = release_threshold - (effector_pos[2]-min_point_z)
+    if ((effector_pos[2]-max_point_z) > release_threshold):
+        delta_z = release_threshold - (effector_pos[2]-max_point_z)
 
     return delta_z
 

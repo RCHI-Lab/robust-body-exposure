@@ -11,7 +11,7 @@ def sample_action(env):
 def gnn_data_collect(env_name, i):
     coop = 'Human' in env_name
     seed = seeding.create_seed()
-    env = make_env(env_name, coop=coop, seed=0)
+    env = make_env(env_name, coop=coop, seed=seed)
     env.set_env_variations(
         collect_data = True,
         blanket_pose_var = False,
@@ -22,16 +22,9 @@ def gnn_data_collect(env_name, i):
     # env.render()
     observation = env.reset()
     pid = os.getpid()
-
-    num_rollouts = 100
-    np.random.seed(0)
-    actions = np.random.uniform(-1, 1, size=(num_rollouts, 4))
-
     while not done:
-        #action = sample_action(env)
-        #action = np.array([0, 0, -.2, -.5])
+        action = sample_action(env)
         # action = np.array([0,0,0,0])
-        action = actions[i]
         observation, reward, done, info = env.step(action)
     
     filename = f"c{i}_{seed}_pid{pid}"
@@ -57,7 +50,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     current_dir = os.getcwd()
-    variation_type = 'DC_Fixed_Bed_Height_40cm'
+    variation_type = 'DC_Fixed_Body_Height_5cm_LF_0.6'
     pkl_loc = os.path.join(current_dir, variation_type, 'raw')
     pathlib.Path(pkl_loc).mkdir(parents=True, exist_ok=True)
 
@@ -71,7 +64,7 @@ if __name__ == "__main__":
     num_processes = 100
 
     # num data points to collect
-    trials = 10,100
+    trials = 10100
 
     # trials = 1
     # num_processes = 1
@@ -101,5 +94,3 @@ if __name__ == "__main__":
     #     results = [result.get() for result in result_objs]
     #     # print(len(results))
     #     # print(results)
-    
-    print("Samples Collected")

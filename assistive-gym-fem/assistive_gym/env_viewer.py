@@ -51,7 +51,7 @@ def viewer(env_name):
             # print('Observation size:', np.shape(observation), 'Action size:', np.shape(action))
 
         #Perform same action every time
-        #action = np.array([-.2, -.2, -.7, -.7])
+        action = np.array([0, 0, -.3, -.3])
         #action = np.array([.3, .5, 0, 0])
  
         while not done:

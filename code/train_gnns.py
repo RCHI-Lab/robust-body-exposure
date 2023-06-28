@@ -4,20 +4,26 @@ import os
 from bm_dataset import BMDataset
 from gnn_manager import GNN_Manager
 import torch
+import numpy as np
 
-dataset_dir = '/home/kpputhuveetil/git/vBM-GNNdev/DATASETS/standard'
+dataset_dir = '/home/kendragivens/env/robust-body-exposure/assistive-gym-fem/assistive_gym/DC_Fixed_Body_Height_5cm_LF_0.6/'
 
-datasets = [0, 0, 0, 0, 0, 0, 0, 0]
-standard_data = BMDataset(
+datasets = [0, 0]
+subsampled = BMDataset(
         root=dataset_dir, 
-        description='rotate_overhang',
+        description='Standard_Dataset',
         voxel_size=0.05, edge_threshold=0.06,
         rot_draping=True)
-standard_data_3D = BMDataset(
+not_subsampled = BMDataset(
         root=dataset_dir, 
-        description='3D_representation',
-        voxel_size=0.05, edge_threshold=0.06,
-        rot_draping=False, use_3D=True)
+        description='Standard_Dataset_Not_Subsampled',
+        voxel_size=np.nan, edge_threshold=0.06,
+        rot_draping=True)
+# standard_data_3D = BMDataset(
+#         root=dataset_dir, 
+#         description='3D_representation',
+#         voxel_size=0.05, edge_threshold=0.06,
+#         rot_draping=False, use_3D=True)
 #%%
 # names = ['filt_drape', '2D', 'rot_drape', '3D']
 # names = ['standard_2D_10k', 'standard_2D_50k', 'pose_var_2D_50k', 'blanket_var_2D_50k', 'blanket_var_3D_50k', 'body_var_2D_50k', 'no_human_50k', 'combo_var']
@@ -36,8 +42,8 @@ model_names = [
         'body_var_2D_10k', 
         'no_human_10k',
         'throwaway']
-dataset_sizes = [10000, 500, 100, 25000, 10000, 10000, 10000, 10000, 10000, 1000]
-datasets = [standard_data_3D]
+dataset_sizes = [10000, 10000]
+datasets = [subsampled, not_subsampled]
 
 
 for i in range(len(datasets)):
@@ -60,7 +66,6 @@ for i in range(len(datasets)):
         batch_size = 100
         num_workers = 4
         use_displacement = True
-
 
         gnn_manager.initialize_new_model(save_dir, train_test, 
                 proc_layers, num_images, epochs, learning_rate, seed, batch_size, num_workers,
