@@ -28,7 +28,7 @@ To run the RoBE framework, you will need install the following packages accordin
 1. [pytorch](https://pytorch.org/get-started/previous-versions/#v1101)==1.10.1+cu113
 2. [torch-scatter](https://github.com/rusty1s/pytorch_scatter)==2.0.9
 3. [torch-sparse](https://github.com/rusty1s/pytorch_sparse)==0.6.12
-4. [torch_geometric](https://pytorch-geometric.readthedocs.io/en/2.0.3/notes/installation.html)==2.0.3
+4. [torch-geometric](https://pytorch-geometric.readthedocs.io/en/2.0.3/notes/installation.html)==2.0.3
 5. [tensorboard](https://pytorch.org/tutorials/recipes/recipes/tensorboard_with_pytorch.html)==2.9.1
 6. [cma](https://github.com/CMA-ES/pycma)==3.1.0
 
